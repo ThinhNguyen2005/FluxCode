@@ -617,7 +617,7 @@ impl Workbench {
                     h.child(
                         btn(
                             "diff-ctx",
-                            if is_full { "Full file" } else { "Changes only" },
+                            if is_full { "Changes only" } else { "Full file" },
                             false,
                         )
                         .on_click(cx.listener(move |_, _, _, cx| {

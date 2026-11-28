@@ -315,21 +315,33 @@ pub(crate) fn run_step(
         } => {
             let full = dir.join(path);
             let status = read_status(dir, target)?;
-            let current =
-                crate::workbench::read_file_bytes(target, &full, expected.len() as u64).ok();
+            let current = crate::workbench::read_file_bytes(
+                target,
+                &full,
+                expected.len().max(resolved.len()) as u64,
+            )
+            .ok();
             if !status.conflicts.iter().any(|file| file.path == *path)
-                || current.as_deref() != Some(expected.as_bytes())
+                || !matches!(
+                    current.as_deref(),
+                    Some(bytes) if bytes == expected.as_bytes() || bytes == resolved.as_bytes()
+                )
             {
                 return Err(
                     tr("The conflict changed. Reopen it before saving the resolution.").into(),
                 );
             }
-            crate::workbench::write_doc_to_disk(target, &full, resolved, false, None)?;
+            if current.as_deref() != Some(resolved.as_bytes()) {
+                crate::workbench::write_doc_to_disk(target, &full, resolved, false, None)?;
+            }
             return run_step(
                 dir,
                 &git_step(&["--literal-pathspecs", "add", "--", path]),
                 target,
-            );
+            )
+            .map_err(|error| {
+                crate::trf!("Conflict resolution was saved, but staging failed: {error}"; error => error)
+            });
         }
         Step::Hunk {
             path,
@@ -1257,11 +1269,39 @@ mod tests {
             expected,
             resolved: "resolved\n".into(),
         };
-        assert!(run_step(&repo.0, &save("stale".into()), None).is_err());
+        let stale = run_step(&repo.0, &save("stale".into()), None).unwrap_err();
+        assert_eq!(
+            stale,
+            tr("The conflict changed. Reopen it before saving the resolution.")
+        );
         assert_eq!(
             std::fs::read_to_string(repo.0.join("same.txt")).unwrap(),
             restored
         );
+        let lock = repo.0.join(".git/index.lock");
+        std::fs::write(&lock, b"").unwrap();
+        let failed = run_step(&repo.0, &save(restored.clone()), None).unwrap_err();
+        assert!(failed.contains("Conflict resolution was saved, but staging failed:"));
+        assert!(failed.contains("index.lock"));
+        assert_eq!(
+            std::fs::read_to_string(repo.0.join("same.txt")).unwrap(),
+            "resolved\n"
+        );
+        assert_eq!(repo.status().conflicts.len(), 1);
+
+        repo.write("same.txt", "changed outside the editor\n");
+        let stale = run_step(&repo.0, &save(restored.clone()), None).unwrap_err();
+        assert_eq!(
+            stale,
+            tr("The conflict changed. Reopen it before saving the resolution.")
+        );
+        assert_eq!(
+            std::fs::read_to_string(repo.0.join("same.txt")).unwrap(),
+            "changed outside the editor\n"
+        );
+
+        std::fs::remove_file(lock).unwrap();
+        repo.write("same.txt", "resolved\n");
         run_step(&repo.0, &save(restored), None).unwrap();
         assert!(repo.status().conflicts.is_empty());
         assert_eq!(repo.git(&["show", ":same.txt"]), "resolved\n");

@@ -2193,6 +2193,39 @@ pub const ID: &[(&str, &str)] = &[
     ("Inline", "Sebaris"),
     ("Full file", "Seluruh file"),
     ("Changes only", "Perubahan saja"),
+    ("Checking for a Git repository…", "Memeriksa repository Git…"),
+    ("Commit the staged changes (Enter)", "Commit perubahan yang sudah di-stage (Enter)"),
+    ("Discard All", "Buang Semua"),
+    ("Discard {n} files in {group}?", "Buang {n} file di {group}?"),
+    ("Merge Conflicts", "Konflik Merge"),
+    (
+        "Remove these files from the index and working tree.",
+        "Hapus file ini dari index dan working tree.",
+    ),
+    (
+        "Restore the index and working tree to the last commit.",
+        "Pulihkan index dan working tree ke commit terakhir.",
+    ),
+    (
+        "Restore the original merge conflict in the working tree.",
+        "Pulihkan konflik merge semula di working tree.",
+    ),
+    (
+        "Restore the working tree from the index.",
+        "Pulihkan working tree dari index.",
+    ),
+    ("Running Git…", "Menjalankan Git…"),
+    (
+        "Save or close the modified editor before discarding.",
+        "Simpan atau tutup editor yang sudah diubah sebelum membuang.",
+    ),
+    ("Show {n} more files", "Tampilkan {n} file lainnya"),
+    (
+        "Switch to a branch before pushing or syncing.",
+        "Pindah ke branch sebelum push atau sync.",
+    ),
+    ("Untracked Files", "File Untracked"),
+    ("Untracked files will be deleted.", "File untracked akan dihapus."),
     ("Previous change", "Perubahan sebelumnya"),
     ("Next change", "Perubahan berikutnya"),
     (
@@ -2224,6 +2257,7 @@ pub const ID: &[(&str, &str)] = &[
     ("No commits yet.", "Belum ada commit."),
     ("View full diff", "Lihat diff penuh"),
     ("No changed files.", "Tidak ada file berubah."),
+    ("No changes.", "Tidak ada perubahan."),
     ("Publish Branch", "Publikasikan Branch"),
     ("Upstream unavailable", "Upstream tidak tersedia"),
     ("Hunk {n}/{total}", "Hunk {n}/{total}"),
@@ -2261,6 +2295,10 @@ pub const ID: &[(&str, &str)] = &[
     (
         "The conflict changed. Reopen it before saving the resolution.",
         "Konflik berubah. Buka ulang sebelum menyimpan resolusi.",
+    ),
+    (
+        "Conflict resolution was saved, but staging failed: {error}",
+        "Resolusi konflik sudah disimpan, tetapi gagal di-stage: {error}",
     ),
     (
         "The selected files changed. Review Source Control and try again.",
